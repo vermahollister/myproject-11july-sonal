@@ -1,1 +1,390 @@
 This is payment on dev branch
+html<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise Multi-Tool Productivity Dashboard</title>
+    <style>
+        /* CSS RESET & VARIABLES */
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --border-radius: 12px;
+            --transition: all 0.3s ease;
+            --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        .light-theme {
+            --bg-primary: #f1f5f9;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #e2e8f0;
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
+            --success: #059669;
+            --danger: #dc2626;
+            --warning: #d97706;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font);
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition);
+            overflow-x: hidden;
+        }
+
+        /* LAYOUT ARCHITECTURE */
+        header {
+            background-color: var(--bg-secondary);
+            border-bottom: 1px solid var(--bg-tertiary);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo-area h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.05em;
+            background: linear-gradient(to right, var(--accent), #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .controls-area {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .btn {
+            background-color: var(--accent);
+            color: #ffffff;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .btn:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .btn-secondary {
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--text-secondary);
+            color: var(--bg-primary);
+        }
+
+        .main-container {
+            display: flex;
+            flex: 1;
+            position: relative;
+        }
+
+        /* SIDEBAR SYSTEM */
+        aside {
+            width: 260px;
+            background-color: var(--bg-secondary);
+            border-right: 1px solid var(--bg-tertiary);
+            padding: 2rem 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .nav-item {
+            padding: 0.8rem 1rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-weight: 500;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            border-left: 4px solid var(--accent);
+        }
+
+        /* CONTENT WORKSPACE */
+        main {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--bg-tertiary);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .metric-value {
+            font-size: 2.25rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        /* MODULE SPECIFIC STYLES: UNIT CONVERTER */
+        .converter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .form-control {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        input, select, textarea {
+            background-color: var(--bg-primary);
+            border: 1px solid var(--bg-tertiary);
+            color: var(--text-primary);
+            padding: 0.75rem;
+            border-radius: var(--border-radius);
+            outline: none;
+            width: 100%;
+            transition: var(--transition);
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+
+        /* DATA VISUALIZER GRAPHICS */
+        .chart-container {
+            width: 100%;
+            height: 250px;
+            position: relative;
+            margin-top: 1rem;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            padding-top: 20px;
+            border-bottom: 2px solid var(--bg-tertiary);
+        }
+
+        .chart-bar-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            height: 100%;
+            justify-content: flex-end;
+            gap: 0.5rem;
+        }
+
+        .chart-bar {
+            width: 60%;
+            background-color: var(--accent);
+            border-radius: 4px 4px 0 0;
+            transition: height 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            min-height: 5px;
+        }
+
+        .chart-bar:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .chart-tooltip {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--text-primary);
+            color: var(--bg-primary);
+            padding: 2px 6px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            border-radius: 4px;
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        .chart-bar:hover .chart-tooltip {
+            opacity: 1;
+        }
+
+        .chart-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* TODO TASK MANAGER LISTS */
+        .todo-input-row {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .todo-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .todo-item {
+            background-color: var(--bg-primary);
+            padding: 0.75rem 1rem;
+            border-radius: var(--border-radius);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid var(--bg-tertiary);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .todo-item.completed span {
+            text-decoration: line-through;
+            color: var(--text-secondary);
+        }
+
+        .todo-item-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-icon {
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: 4px;
+            transition: var(--transition);
+        }
+
+        .action-icon:hover {
+            background-color: var(--bg-tertiary);
+        }
+
+        /* TIMELINE ELEMENT */
+        .timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            position: relative;
+            padding-left: 1rem;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 4px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background-color: var(--bg-tertiary);
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-left: 1.5rem;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -1px;
+            top: 4px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: var(--accent);
+            border: 2px solid var(--bg-secondary);
+        }
+
+        .timeline-time {
+Use code with caution.font-size: 0.8rem;color: var(--text-secondary);margin-bottom: 0.25rem;}/* DATA TABLE MODULE */.table-responsive {width: 100%;overflow-x: auto;margin-top: 1rem;border: 1px solid var(--bg-tertiary);border-radius: var(--border-radius);}table {width: 100%;border-collapse: collapse;text-align: left;font-size: 0.9rem;}th, td {padding: 1rem;border-bottom: 1px solid var(--bg-tertiary);}th {background-color: var(--bg-tertiary);color: var(--text-primary);font-weight: 600;}tr:last-child td {border-bottom: none;}tr:hover td {background-color: rgba(255, 255, 255, 0.02);}.light-theme tr:hover td {background-color: rgba(0, 0, 0, 0.02);}/* UTILITY UTILS / ANIMATIONS */@keyframes fadeIn {from { opacity: 0; transform: translateY(10px); }to { opacity: 1; transform: translateY(0); }}.hide { display: none !important; }footer {background-color: var(--bg-secondary);border-top: 1px solid var(--bg-tertiary);padding: 1rem 2rem;text-align: center;font-size: 0.85rem;color: var(--text-secondary);margin-top: auto;}/* RESPONSIVE DESIGN */@media(max-width: 768px) {.main-container { flex-direction: column; }aside { width: 100%; padding: 1rem; }header { flex-direction: column; gap: 1rem; text-align: center; }}🌐 Unified Dashboard📐 Unit Processing Engine📊 Matrix Analytics📋 Logic & Task Manager🗄️ System Data RegistryEngine Status Core OperationalSystem notification.×© 2026 NexusCore Automated Systems Engineering Group Inc. Multi-architecture compilation complete.// COMPREHENSIVE STATIC GLOBAL APPLICATION ENGINE UTILITIESconst App = {activeTab: 'all-modules',isDarkTheme: true,init() {// Initialize clock architecturesetInterval(this.updateClock, 1000);this.updateClock();// Build initial modules telemetry stateConverterEngine.init();AnalyticsEngine.init();TaskManager.init();RegistryEngine.init();this.triggerNotification("System Control Dashboard Fully Upstream", "success");},updateClock() {const now = new Date();const clockEl = document.getElementById('live-clock');if(clockEl) {clockEl.innerText = now.toLocaleTimeString();}},toggleTheme() {this.isDarkTheme = !this.isDarkTheme;if(this.isDarkTheme) {document.body.classList.remove('light-theme');} else {document.body.classList.add('light-theme');}this.triggerNotification("UI Theme Configuration Modulated Successfully", "info");},switchTab(tabId, element) {const panes = document.querySelectorAll('.tab-pane');panes.forEach(pane => pane.classList.add('hide'));const targets = document.getElementById(tabId);if(targets) targets.classList.remove('hide');const navItems = document.querySelectorAll('.nav-item');navItems.forEach(item => item.classList.remove('active'));element.classList.add('active');this.activeTab = tabId;this.triggerNotification(Switched Workspace Panel View to [${tabId.toUpperCase()}], 'info');},triggerNotification(msg, statusType) {const banner = document.getElementById('alert-banner');const text = document.getElementById('alert-text');banner.classList.remove('hide', 'success', 'danger', 'info');text.innerText = msg;if(statusType === 'success') {banner.style.backgroundColor = 'var(--success)';banner.style.color = '#ffffff';} else if(statusType === 'danger') {banner.style.backgroundColor = 'var(--danger)';banner.style.color = '#ffffff';} else {banner.style.backgroundColor = 'var(--bg-tertiary)';banner.style.color = 'var(--text-primary)';}TaskManager.appendLog("System Notification Module", msg);}};// FULL EXPANDED 22 UNIT UNIT-CONVERTER LOGIC ALGORITHMconst ConverterEngine = {// Expanded unit datasetsunits: {length: {meters: { name: "Meters (m)", factor: 1 },kilometers: { name: "Kilometers (km)", factor: 1000 },centimeters: { name: "Centimeters (cm)", factor: 0.01 },millimeters: { name: "Millimeters (mm)", factor: 0.001 },miles: { name: "Miles (mi)", factor: 1609.344 },yards: { name: "Yards (yd)", factor: 0.9144 },feet: { name: "Feet (ft)", factor: 0.3048 },inches: { name: "Inches (in)", factor: 0.0254 }},weight: {kilograms: { name: "Kilograms (kg)", factor: 1 },grams: { name: "Grams (g)", factor: 0.001 },milligrams: { name: "Milligrams (mg)", factor: 0.000001 },pounds: { name: "Pounds (lbs)", factor: 0.45359237 },ounces: { name: "Ounces (oz)", factor: 0.028349523 }},temp: {celsius: { name: "Celsius (°C)", functional: true },fahrenheit: { name: "Fahrenheit (°F)", functional: true },kelvin: { name: "Kelvin (K)", functional: true }}},init() {this.populateUnits('sandbox');this.populateUnits('full');},populateUnits(targetScope) {const typeSelect = document.getElementById(${targetScope}-type);const fromSelect = document.getElementById(${targetScope}-from);const toSelect = document.getElementById(${targetScope}-to);const selectedType = typeSelect.value;const availableUnits = this.units[selectedType];fromSelect.innerHTML = '';toSelect.innerHTML = '';for(let key in availableUnits) {let opt1 = document.createElement('option');opt1.value = key;opt1.innerText = availableUnits[key].name;fromSelect.appendChild(opt1);let opt2 = document.createElement('option');opt2.value = key;opt2.innerText = availableUnits[key].name;toSelect.appendChild(opt2);}// Default mismatch offset selection to simplify operational layoutif(toSelect.options.length > 1) {toSelect.selectedIndex = 1;}this.processConversion(targetScope);},processConversion(targetScope) {const type = document.getElementById(${targetScope}-type).value;const fromUnit = document.getElementById(${targetScope}-from).value;const toUnit = document.getElementById(${targetScope}-to).value;const inputValue = parseFloat(document.getElementById(${targetScope}-input).value);const outputElement = document.getElementById(${targetScope}-output);if(isNaN(inputValue)) {outputElement.innerText = "Invalid Vector Payload";return;}let finalResult = 0;if(type === 'temp') {// Unique specialized thermodynamic formulas mappinglet absoluteCelsius = 0;if(fromUnit === 'celsius') absoluteCelsius = inputValue;else if(fromUnit === 'fahrenheit') absoluteCelsius = (inputValue - 32) * 5 / 9;else if(fromUnit === 'kelvin') absoluteCelsius = inputValue - 273.15;if(toUnit === 'celsius') finalResult = absoluteCelsius;else if(toUnit === 'fahrenheit') finalResult = (absoluteCelsius * 9 / 5
+
+
+
+Personalized Content and Content Management Systems
+Posted on 2014/06/02 by Mickey Rahman
+I’ve been meaning to write this post for a while. Couple of months ago,
+
+Bill Maher‘s ending monologue was about personalized content. 
+All of us who have been working with Sitecore and other content management systems knows what this is, of course. A very big majority of the users of Sitecore are marketers, and their goal is to captivate as much of their audience as possible, part of their strategy includes tailoring the content to the reader. Sitecore offers sophisticated tools to be able to track what the user prefers and then serve up specific content that interests the reader. This is great for the reader, who gets to see more content about topics that they like.
+
+So – Bill Maher’s premise is that personalized content is making us dumber. According to him, more and more Americans are only getting “news” from places that only reinforce what they think. This leads to unchallenged thoughts and opinions, which can hinder an expanded thinking process. You can view the entire transcript here: http://bit.ly/1hXHpzE
+This repository contains code fragments to give you a head start to your python programming zeal. It has files relating to basic syntax as well as files relating to important libraries that has many applications in solving real life problems and in prototyping.
+
+Note : Readers should have basic programming experience of atleast one of basic programming language like C, C+ or Java since basic programming principles have not been covered. This repository only focuses on learning quickly syntax of python and its libraries.
+
+basic_syntax.py : has code related to very basic, essential and core parts of python.
+You can also watch the video:
